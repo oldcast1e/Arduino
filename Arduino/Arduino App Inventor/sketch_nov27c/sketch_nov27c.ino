@@ -49,8 +49,10 @@ int Function_Light(int val){
   if(val > 230){ light_status  = false;key == 1 ? 0: 1;delay(100);}
   else {light_status  = true;key == 1 ? 0: 1;delay(100);}
 
-  if(light_status == 1 && key == 0){ Serial.println("Light Status is ON"); key = 1 ; return 1;}
-  else if(light_status == 0 && key == 1){Serial.println("Light Status is OFF");key = 0; return 0;}
+  if(light_status == 1 && key == 0){ Serial.println("Y"); key = 1 ; return 1;}
+  //Light Status is ON
+  else if(light_status == 0 && key == 1){Serial.println("N");key = 0; return 0;}
+  //Light Status is OFF
   else return 3;
   
 

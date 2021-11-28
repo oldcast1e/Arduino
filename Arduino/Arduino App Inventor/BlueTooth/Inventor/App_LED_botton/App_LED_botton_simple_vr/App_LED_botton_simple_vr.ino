@@ -1,10 +1,6 @@
-# include <SoftwareSerial.h>
-
-SoftwareSerial btS = SoftwareSerial(9,10);
-
-const int b1= 7;
-const int b2 = 6;
-const int b3 = 5;
+const int b1= 4;
+const int b2 = 3;
+const int b3 = 2;
 
 bool s1 = false;
 bool s2 = false;
@@ -13,15 +9,17 @@ bool s3 = false;
 void F1(){
 
   if(s1){
-    btS.print("R");
+    Serial1.println("b1");
+    Serial.println("Red");
     delay(400);
   }
 }
-
+//App Inventor
 void F2(){
 
   if(s2){
-    btS.print("Y");
+    Serial1.write("b2");
+    Serial.println("Yellow");
     delay(400);
   }
 }
@@ -29,7 +27,8 @@ void F2(){
 void F3(){
 
   if(s3){
-    btS.print("G");
+    Serial1.write("b3");
+    Serial.println("Green");
     delay(400);
   }
 }
@@ -39,7 +38,10 @@ void setup(){
   pinMode(b1,INPUT);
   pinMode(b1,INPUT);
   pinMode(b1,INPUT);
-  btS.begin(9600);
+
+  Serial.begin(9600);
+  Serial1.begin(9600);
+  
 }
 
 void loop(){
