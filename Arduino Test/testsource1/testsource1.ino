@@ -5,9 +5,13 @@ void setup() {
 }
 
 void loop() {
-  Serial.print("#4P800T3000\r\n");
-  delay(1000);
-  Serial.print("#4P1800T3000\r\n");
-  delay(1000);
+//  Serial.println("#11P1200T1000");
+//  delay(1000);
+//  Serial.print("#11P1500T1000\r\n");
+//  delay(1000);
+//  Serial.println("#11P1800T1000");
+//  delay(1000);
+//  Serial.print("#11P1500T1000\r\n");
+//  delay(1000);
 
 }
