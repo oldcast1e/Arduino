@@ -1,16 +1,13 @@
-int LED = 13;
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(13, OUTPUT);
+  // pinMode(13, OUTPUT);
   Serial.begin(9600);
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  // digitalWrite(LED, HIGH);
-  Serial.println("Hello World!");
-  delay(500);
-  // digitalWrite(LED, LOW);
+  Serial.print("#4P800T3000\r\n");
+  delay(1000);
+  Serial.print("#4P1800T3000\r\n");
+  delay(1000);
 
 }
