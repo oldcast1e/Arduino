@@ -16,13 +16,23 @@ void move(){
 
 }
 
+void powersram(){
+  /**
+  두 팔을 들어 팔 운동을 하고 내려 놓는 동작
+   */
+  armup();
+  Serial.print("#12P2000#10P2000\r\n");
+  delay(1000);
+  formset();
+}
+
 void setup() {
   // pinMode(13, OUTPUT);
   Serial.begin(9600);
   formset(); delay(1000);
 
-  armup();delay(3000);
-  armdown();
+  // armup();delay(3000);
+  // armdown();
 }
 
 void loop() {
