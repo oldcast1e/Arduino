@@ -21,8 +21,8 @@ void power_arm(){
   두 팔을 들어 팔 운동을 하고 내려 놓는 동작
    */
   armup();
-  Serial.print("#12P2000#10P2000\r\n");
-  delay(1000);
+  Serial.print("#12P2000#10P1000\r\n");
+  delay(3000);
   formset();
 }
 
