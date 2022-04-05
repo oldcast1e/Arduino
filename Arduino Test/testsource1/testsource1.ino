@@ -9,7 +9,10 @@ void setup() {
 
 void armup(){
   Serial.print("#9P2500#13P500\r\n");
+}
 
+void armdown(){
+  Serial.print("#9P1500#13P1500\r\n");
 }
 
 void move(){
