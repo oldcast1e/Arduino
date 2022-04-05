@@ -16,7 +16,7 @@ void move(){
 
 }
 
-void powersram(){
+void power_arm(){
   /**
   두 팔을 들어 팔 운동을 하고 내려 놓는 동작
    */
@@ -30,6 +30,8 @@ void setup() {
   // pinMode(13, OUTPUT);
   Serial.begin(9600);
   formset(); delay(1000);
+
+  power_arm();
 
   // armup();delay(3000);
   // armdown();
