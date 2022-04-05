@@ -1,3 +1,6 @@
+/**
+모터 제어 테스트 코드
+ */
 void setup() {
   // pinMode(13, OUTPUT);
   Serial.begin(9600);
