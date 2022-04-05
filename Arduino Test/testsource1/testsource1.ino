@@ -2,7 +2,7 @@
 모터 제어 테스트 코드
  */
 void basic_stand(){
-  Serial.print("#1P1500#2P1500#3P1500#4P1500#5P1500#8P1500#9P1500#10P550#11P1500#12P2500#13P1500#14P1500#16P1500#17P1500#18P1500#19P1500#20P1500\r\n");
+  Serial.print("#1P1500#2P1500#3P1500#4P1500#5P1500#8P1500#9P1500#10P550#11P1500#12P2500#13P1500#14P1500#16P1500#17P1500#18P1500#19P1500#20P1600\r\n");
   /**
   #1P1400
   #2P1500
@@ -53,10 +53,13 @@ void arm_power(){
    */
   arm_up();delay(1000);
 
-  arm_swing();delay(3000);
-  arm_raise();delay(3000);
-  arm_raise_up();delay(3000);
-  arm_raise();delay(3000);
+  arm_swing();delay(1000);
+  
+  arm_raise();delay(1000);
+  arm_raise_up();delay(1000);
+  arm_raise();delay(1000);
+  arm_raise_up();delay(1000);
+  arm_raise();delay(1000);
 
   basic_stand();
 }
@@ -70,11 +73,11 @@ void arm_raise(){
   근육을 자랑하듯 팔을 드는 동작
 
   #8P1100
-  #9P2100
+  #9P2000
   #13P1000
   #14P1800
   */
-  Serial.print("8P1100#9P1500#13P1000#14P1800\r\n");
+  Serial.print("#8P1100#9P2000#13P1000#14P1800\r\n");
 }
 
 void arm_raise_up(){
@@ -94,7 +97,12 @@ void setup() {
   //기본 자세 설정
   //-------------------------------
 
-  //arm_power();
+  arm_power();
+//  arm_up();delay(1000);
+//  arm_swing();delay(3000);
+//  arm_raise();delay(3000);
+//
+//  basic_stand(); delay(1000);
 
 
 }
