@@ -52,8 +52,8 @@ void arm_power(){
    */
   arm_up();delay(1000);
 
-  arm_swing();delay(1000);
-  arm_raise();delay(1000);
+  arm_swing();delay(3000);
+  arm_raise();delay(3000);
 
   basic_stand();
 }
@@ -71,7 +71,7 @@ void arm_raise(){
   #13P1000
   #14P1800
   */
-  Serial.print("8P1100#9P2100#13P1000#14P1800\r\n");
+  Serial.print("8P1100#9P1800#13P1000#14P1800\r\n");
 }
 
 void setup() {
