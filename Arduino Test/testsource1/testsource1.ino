@@ -54,6 +54,8 @@ void arm_power(){
 
   arm_swing();delay(3000);
   arm_raise();delay(3000);
+  arm_raise_up();delay(3000);
+  arm_raise();delay(3000);
 
   basic_stand();
 }
@@ -71,7 +73,18 @@ void arm_raise(){
   #13P1000
   #14P1800
   */
-  Serial.print("8P1100#9P1800#13P1000#14P1800\r\n");
+  Serial.print("8P1100#9P1900#13P1000#14P1800\r\n");
+}
+
+void arm_raise_up(){
+  /**
+  <주의>두 팔을 회전 한 후 arm_raise 함수 실행 후 실행 할 것!
+  - arm_swing() 함수를 먼저 실행 한 후 부속 동작
+  - arm_swing: 10번과 12번 서보를 사용함.
+  - arm_raise : 팔을 회전 후 으쓱 하는 동작을 실행
+  */
+  Serial.print("#9P1500#13P1500\r\n"); 
+
 }
 
 void setup() {
