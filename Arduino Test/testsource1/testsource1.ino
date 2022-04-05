@@ -74,7 +74,7 @@ void arm_raise(){
   #13P1000
   #14P1800
   */
-  Serial.print("8P1100#9P1900#13P1000#14P1800\r\n");
+  Serial.print("8P1100#9P1500#13P1000#14P1800\r\n");
 }
 
 void arm_raise_up(){
@@ -94,7 +94,7 @@ void setup() {
   //기본 자세 설정
   //-------------------------------
 
-  arm_power();
+  //arm_power();
 
 
 }
