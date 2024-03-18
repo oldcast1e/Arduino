@@ -1,75 +1,72 @@
-/* DHT library
+//
+//    FILE: dht.h
+//  AUTHOR: Rob Tillaart
+// VERSION: 0.1.18
+// PURPOSE: DHT Temperature & Humidity Sensor library for Arduino
+//     URL: http://arduino.cc/playground/Main/DHTLib
+//
+// HISTORY:
+// see dht.cpp file
+//
 
-MIT license
-written by Adafruit Industries
-*/
-#ifndef DHT_H
-#define DHT_H
+#ifndef dht_h
+#define dht_h
 
-#if ARDUINO >= 100
- #include "Arduino.h"
+#if ARDUINO < 100
+#include <WProgram.h>
+#include <pins_arduino.h>  // fix for broken pre 1.0 version - TODO TEST
 #else
- #include "WProgram.h"
+#include <Arduino.h>
 #endif
 
+#define DHT_LIB_VERSION "0.1.18"
 
-// Uncomment to enable printing out nice debug messages.
-//#define DHT_DEBUG
+#define DHTLIB_OK                   0
+#define DHTLIB_ERROR_CHECKSUM       -1
+#define DHTLIB_ERROR_TIMEOUT        -2
+#define DHTLIB_ERROR_CONNECT        -3
+#define DHTLIB_ERROR_ACK_L          -4
+#define DHTLIB_ERROR_ACK_H          -5
 
-// Define where debug output will be printed.
-#define DEBUG_PRINTER Serial
+#define DHTLIB_DHT11_WAKEUP         18
+#define DHTLIB_DHT_WAKEUP           1
 
-// Setup debug printing macros.
-#ifdef DHT_DEBUG
-  #define DEBUG_PRINT(...) { DEBUG_PRINTER.print(__VA_ARGS__); }
-  #define DEBUG_PRINTLN(...) { DEBUG_PRINTER.println(__VA_ARGS__); }
-#else
-  #define DEBUG_PRINT(...) {}
-  #define DEBUG_PRINTLN(...) {}
-#endif
+#define DHTLIB_DHT11_LEADING_ZEROS  1
+#define DHTLIB_DHT_LEADING_ZEROS    6
 
-// Define types of sensors.
-#define DHT11 11
-#define DHT22 22
-#define DHT21 21
-#define AM2301 21
+// max timeout is 100 usec.
+// For a 16 Mhz proc 100 usec is 1600 clock cycles
+// loops using DHTLIB_TIMEOUT use at least 4 clock cycli
+// so 100 us takes max 400 loops
+// so by dividing F_CPU by 40000 we "fail" as fast as possible
+#define DHTLIB_TIMEOUT 400 // (F_CPU/40000)
 
+class dht
+{
+public:
+    // return values:
+    // DHTLIB_OK
+    // DHTLIB_ERROR_CHECKSUM
+    // DHTLIB_ERROR_TIMEOUT
+    // DHTLIB_ERROR_CONNECT
+    // DHTLIB_ERROR_ACK_L
+    // DHTLIB_ERROR_ACK_H
+    int read11(uint8_t pin);
+    int read(uint8_t pin);
 
-class DHT {
-  public:
-   DHT(uint8_t pin, uint8_t type, uint8_t count=6);
-   void begin(void);
-   float readTemperature(bool S=false, bool force=false);
-   float convertCtoF(float);
-   float convertFtoC(float);
-   float computeHeatIndex(float temperature, float percentHumidity, bool isFahrenheit=true);
-   float readHumidity(bool force=false);
-   boolean read(bool force=false);
+    inline int read21(uint8_t pin) { return read(pin); };
+    inline int read22(uint8_t pin) { return read(pin); };
+    inline int read33(uint8_t pin) { return read(pin); };
+    inline int read44(uint8_t pin) { return read(pin); };
 
- private:
-  uint8_t data[5];
-  uint8_t _pin, _type;
-  #ifdef __AVR
-    // Use direct GPIO access on an 8-bit AVR so keep track of the port and bitmask
-    // for the digital pin connected to the DHT.  Other platforms will use digitalRead.
-    uint8_t _bit, _port;
-  #endif
-  uint32_t _lastreadtime, _maxcycles;
-  bool _lastresult;
+    double humidity;
+    double temperature;
 
-  uint32_t expectPulse(bool level);
-
+private:
+    uint8_t bits[5];  // buffer to receive data
+    int _readSensor(uint8_t pin, uint8_t wakeupDelay, uint8_t leadingZeroBits);
 };
-
-class InterruptLock {
-  public:
-   InterruptLock() {
-    noInterrupts();
-   }
-   ~InterruptLock() {
-    interrupts();
-   }
-
-};
-
 #endif
+//
+// END OF FILE
+//
