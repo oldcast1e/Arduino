@@ -1,0 +1,48 @@
+{
+    "name": "ESPboy",
+    "version": "1.2.1",
+    "description": "This library provides a driver for the ESPboy (Wemos D1 mini - ESP8266) multi gadget handheld created by Roman Sokolov. Experiment with retro game programming, IoT, and STEAM education while having fun. See more on https://www.espboy.com/.",
+    "keywords": "espboy, esp8266, retrogaming, handheld, iot, stem-education",
+    "license": "GPL-3.0",
+    "frameworks": "arduino",
+    "platforms": "espressif8266",
+    "headers": "ESPboy.h",
+    "authors": {
+        "name": "m1cr0lab",
+        "url": "https://github.com/m1cr0lab",
+        "maintainer": true
+    },
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/m1cr0lab-espboy/ESPboy"
+    },
+    "dependencies": [
+        {
+            "owner": "adafruit",
+            "name": "Adafruit MCP4725",
+            "version": "^2.0.0"
+        },
+        {
+            "owner": "adafruit",
+            "name": "Adafruit MCP23017 Arduino Library",
+            "version": "^2.1.0"
+        },
+        {
+            "owner": "lovyan03",
+            "name": "LovyanGFX",
+            "version": "^0.4.4"
+        }
+    ],
+    "export": {
+        "include": [
+            "Readme.md",
+            "LICENSE",
+            "examples/*",
+            "src/*",
+            "library.json",
+            "library.properties",
+            "keywords.txt"
+        ]
+    }
+}
