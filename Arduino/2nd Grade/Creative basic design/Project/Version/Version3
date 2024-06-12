@@ -1,0 +1,77 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266HTTPClient.h>
+
+// 와이파이 네트워크 정보
+const char* ssid = "";  // 여기에 와이파이 네트워크 이름 입력
+const char* password = "";  // 여기에 와이파이 비밀번호 입력
+
+// 서울 버스 정보 API 엔드포인트
+const char* apiEndpoint = "http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid";  // 올바른 API 엔드포인트
+
+// 서울 버스 정보 API 키
+const char* serviceKey = "reLDcB4o3fLJ6nMp3f0BDtErKR23ShF4BScYgMco2cOAHGniys0ZEBNeYKEs9g98uLD8leyOZOC8juTCYgcMDA%3D%3D";  // 여기에 서울 버스 도착 정보 API의 Service Key를 입력하세요
+
+// 세종대학교 정류소의 식별자
+const char* sejongUniStopId = "05699";  // 세종대학교 정류소 식별자
+const char* childrensParkStopId = "05251";  // 어린이대공원앞.세종대학교 정류소 식별자
+
+WiFiClient client;  // WiFiClient 객체 생성
+
+void setup() {
+  Serial.begin(115200);
+  connectToWiFi();  // 와이파이 연결 설정
+}
+
+void loop() {
+  displayBusInfo();  // 버스 도착 정보 표시
+  delay(60000); // 1분마다 업데이트
+}
+
+void connectToWiFi() {
+  Serial.println("Connecting to WiFi...");
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+}
+
+String sendGetRequest(String url) {
+  HTTPClient http;
+  http.begin(client, url);
+  int httpResponseCode = http.GET();
+  String response = "";
+  if (httpResponseCode == 200) {
+    response = http.getString();
+  } else {
+    Serial.print("Error code: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end();
+  return response;
+}
+
+// 세종대학교 정류소의 버스 도착 정보를 가져오는 함수
+String getSejongUniBusInfo() {
+  String requestUrl = String(apiEndpoint) + "?ServiceKey=reLDcB4o3fLJ6nMp3f0BDtErKR23ShF4BScYgMco2cOAHGniys0ZEBNeYKEs9g98uLD8leyOZOC8juTCYgcMDA%3D%3D" + String(serviceKey) + "&arsId=05699" + String(sejongUniStopId);
+  return sendGetRequest(requestUrl);
+}
+
+// 어린이대공원앞 정류소의 버스 도착 정보를 가져오는 함수
+String getChildrensParkBusInfo() {
+  String requestUrl = String(apiEndpoint) + "?ServiceKey=reLDcB4o3fLJ6nMp3f0BDtErKR23ShF4BScYgMco2cOAHGniys0ZEBNeYKEs9g98uLD8leyOZOC8juTCYgcMDA%3D%3D" + String(serviceKey) + "&arsId=05251" + String(childrensParkStopId);
+  return sendGetRequest(requestUrl);
+}
+
+void displayBusInfo() {
+  String sejongUniInfo = getSejongUniBusInfo();  // 세종대학교 버스 도착 정보 가져오기
+  String childrensParkInfo = getChildrensParkBusInfo();  // 어린이대공원앞 버스 도착 정보 가져오기
+  
+  Serial.println("세종대학교 정류소:");
+  Serial.println(sejongUniInfo);
+  Serial.println("어린이대공원앞 정류소:");
+  Serial.println(childrensParkInfo);
+}
+

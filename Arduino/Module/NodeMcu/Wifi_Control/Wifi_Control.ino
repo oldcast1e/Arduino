@@ -2,9 +2,18 @@
  
 #define PIN_LED D1
  
-const char* ssid = "U+Net5158";
-const char* password = "1J1B95D@DC";
+// const char* ssid = "U+Net5158";
+// const char* password = "1J1B95D@DC";
  
+// const char* ssid = "heonseong";
+// const char* password = "popopopo";
+
+//const char* ssid = "yeokyoung";       // WiFi 네트워크 SSID
+//const char* password = "12345678"; 
+
+const char* ssid = "oldcast1e";
+const char* password = "dlgjstjd";
+
 WiFiServer server(80);
  
 void setup() {
