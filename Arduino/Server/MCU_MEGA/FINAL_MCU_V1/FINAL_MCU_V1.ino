@@ -15,7 +15,7 @@ const char* password = "dlgjstjd";
 // 서버 주소 설정
 const char* serverName = "http://192.168.0.4:5001"; //oldcast1e
 // const char* serverName = "http://172.16.26.198:5001";
-// const char* serverName = "http://127.0.0.1:5001";
+// const char* serverName = "http://127.0.0.1:5001";//heonseong
 
 // 소프트웨어 시리얼 설정 (Rx: GPIO14, Tx: GPIO12)
 SoftwareSerial swSer(14, 12);

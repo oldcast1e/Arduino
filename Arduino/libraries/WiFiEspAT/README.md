@@ -122,7 +122,7 @@ GitHub user loboris (Boris Lovosevic) builds customized versions of AT firmware 
 Jiri Bilek created [an alternative AT 1.7 firmware implementation](https://github.com/JiriBilek/ESP_ATMod) over esp8266 Arduino core and WiFi library. This supports SSL TLS1.2 connection in passive mode with this library. This firmware doesn't yet support UDP.
 
 Resources:
-* [the Espressif binaries](https://github.com/espressif/ESP8266_NONOS_SDK/releases) - versions 1.7.x in NONOS SDK 3.0.x
+* [the Espressif binaries](https://github.com/espressif/ESP8266_NONOS_SDK/tree/master/bin) - version 1.7.4 in NONOS SDK 3.0.4
 * [AT 1.7 reference](https://www.espressif.com/en/support/documents/technical-documents?keys=Non-OS+AT&field_type_tid%5B%5D=14) - it contains firmware flashing instructions too
 * [AT LoBo flashing instructions](https://github.com/loboris/ESP8266_AT_LoBo/#flashing). First install esptool.py. If you download the AT LoBo repository as zip, it contains the firmware binaries and a script to flash them.
 * [Jiri Bilek's ESP_ATMod](https://github.com/JiriBilek/ESP_ATMod)
@@ -192,6 +192,7 @@ This library implements Arduino WiFi networking API. The last version of this AP
 * `scanNetworks` optionally can be called with array of type `WiFiApData[]` to fill
 * `hostname` to get the hostname. can be called with char array to fill (see PrintPersistentSettings.ino tool example)
 * `SSID` optionally can be called with char array to fill (see PrintPersistentSettings.ino tool example)
+* `channel` getter
 * `dhcpIsEnabled` to determine if DHCP or static IP is used (see PrintPersistentSettings.ino tool example)
 * `beginAP` can be called without parameters to start the persistent AP (see ConfigurationAP.ino example)
 * `endAP` - stops the AP. `endAP(true)` stops the AP and disables start of persistent AP at startup

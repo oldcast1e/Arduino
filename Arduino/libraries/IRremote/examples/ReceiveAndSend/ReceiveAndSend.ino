@@ -14,6 +14,7 @@
  * A button must be connected between the input SEND_BUTTON_PIN and ground.
  * A visible LED can be connected to STATUS_PIN to provide status.
  *
+ * See also https://dronebotworkshop.com/ir-remotes/#ReceiveAndSend_Code
  *
  * Initially coded 2009 Ken Shirriff http://www.righto.com
  *
@@ -22,7 +23,7 @@
  ************************************************************************************
  * MIT License
  *
- * Copyright (c) 2009-2023 Ken Shirriff, Armin Joachimsmeyer
+ * Copyright (c) 2009-2024 Ken Shirriff, Armin Joachimsmeyer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,11 +70,15 @@
 //#define DECODE_WHYNTER
 //#define DECODE_FAST
 //
+
 #if !defined(RAW_BUFFER_LENGTH)
-#  if RAMEND <= 0x4FF || RAMSIZE < 0x4FF
-#define RAW_BUFFER_LENGTH  120
-#  elif RAMEND <= 0xAFF || RAMSIZE < 0xAFF // 0xAFF for LEONARDO
+// For air condition remotes it requires 600 (maximum for 2k RAM) to 750. Default is 112 if DECODE_MAGIQUEST is enabled, otherwise 100.
+#  if (defined(RAMEND) && RAMEND <= 0x4FF) || (defined(RAMSIZE) && RAMSIZE < 0x4FF)
+#define RAW_BUFFER_LENGTH  120 // 180 is too much here, because we have additional uint8_t rawCode[RAW_BUFFER_LENGTH];
+#  elif (defined(RAMEND) && RAMEND <= 0x8FF) || (defined(RAMSIZE) && RAMSIZE < 0x8FF)
 #define RAW_BUFFER_LENGTH  400 // 600 is too much here, because we have additional uint8_t rawCode[RAW_BUFFER_LENGTH];
+#  elif (defined(RAMEND) && RAMEND <= 0xAFF) || (defined(RAMSIZE) && RAMSIZE < 0xAFF)
+#define RAW_BUFFER_LENGTH  500 // 750 is too much here, because we have additional uint8_t rawCode[RAW_BUFFER_LENGTH];
 #  else
 #define RAW_BUFFER_LENGTH  750
 #  endif

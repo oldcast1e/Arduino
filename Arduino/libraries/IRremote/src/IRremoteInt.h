@@ -106,7 +106,7 @@ struct irparams_struct {
     uint8_t IRReceivePinMask;
 #endif
     volatile uint_fast16_t TickCounterForISR; ///< Counts 50uS ticks. The value is copied into the rawbuf array on every transition. Counting is independent of state or resume().
-#if !IR_REMOTE_DISABLE_RECEIVE_COMPLETE_CALLBACK
+#if !defined(IR_REMOTE_DISABLE_RECEIVE_COMPLETE_CALLBACK)
     void (*ReceiveCompleteCallbackFunction)(void); ///< The function to call if a protocol message has arrived, i.e. StateForISR changed to IR_REC_STATE_STOP
 #endif
     bool OverflowFlag;                  ///< Raw buffer OverflowFlag occurred
@@ -181,7 +181,10 @@ public:
     IRrecv(uint_fast8_t aReceivePin);
     IRrecv(uint_fast8_t aReceivePin, uint_fast8_t aFeedbackLEDPin);
     void setReceivePin(uint_fast8_t aReceivePinNumber);
+#if !defined(IR_REMOTE_DISABLE_RECEIVE_COMPLETE_CALLBACK)
     void registerReceiveCompleteCallback(void (*aReceiveCompleteCallbackFunction)(void));
+#endif
+
     /*
      * Stream like API
      */
@@ -539,6 +542,7 @@ public:
     void sendRC6(uint8_t aAddress, uint8_t aCommand, int_fast8_t aNumberOfRepeats, bool aEnableAutomaticToggle = true);
     void sendSamsungLGRepeat();
     void sendSamsung(uint16_t aAddress, uint16_t aCommand, int_fast8_t aNumberOfRepeats);
+    void sendSamsung16BitAddressAnd8BitCommand(uint16_t aAddress, uint8_t aCommand, int_fast8_t aNumberOfRepeats);
     void sendSamsung16BitAddressAndCommand(uint16_t aAddress, uint16_t aCommand, int_fast8_t aNumberOfRepeats);
     void sendSamsung48(uint16_t aAddress, uint32_t aCommand, int_fast8_t aNumberOfRepeats);
     void sendSamsungLG(uint16_t aAddress, uint16_t aCommand, int_fast8_t aNumberOfRepeats);
@@ -598,6 +602,8 @@ public:
     void sendSharp(uint16_t address, uint16_t command);
     void sendSAMSUNG(unsigned long data, int nbits);
     __attribute__ ((deprecated ("This old function sends MSB first! Please use sendSamsung().")));
+    void sendSamsungMSB(unsigned long data, int nbits);
+    void sendSonyMSB(unsigned long data, int nbits);
     void sendSony(unsigned long data,
             int nbits)
                     __attribute__ ((deprecated ("This old function sends MSB first! Please use sendSony(aAddress, aCommand, aNumberOfRepeats).")));

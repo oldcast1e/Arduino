@@ -198,7 +198,7 @@ void IRReceiveTimerInterruptHandler() {
                 // Flag up a read OverflowFlag; Stop the state machine
                 irparams.OverflowFlag = true;
                 irparams.StateForISR = IR_REC_STATE_STOP;
-#if !IR_REMOTE_DISABLE_RECEIVE_COMPLETE_CALLBACK
+#if !defined(IR_REMOTE_DISABLE_RECEIVE_COMPLETE_CALLBACK)
                 /*
                  * Call callback if registered (not NULL)
                  */
@@ -224,7 +224,7 @@ void IRReceiveTimerInterruptHandler() {
              * Don't reset TickCounterForISR; keep counting width of next leading space
              */
             irparams.StateForISR = IR_REC_STATE_STOP;
-#if !IR_REMOTE_DISABLE_RECEIVE_COMPLETE_CALLBACK
+#if !defined(IR_REMOTE_DISABLE_RECEIVE_COMPLETE_CALLBACK)
             /*
              * Call callback if registered (not NULL)
              */
@@ -335,12 +335,14 @@ void IRrecv::setReceivePin(uint_fast8_t aReceivePinNumber) {
     pinModeFast(aReceivePinNumber, INPUT); // Seems to be at least required by ESP32
 }
 
+#if !defined(IR_REMOTE_DISABLE_RECEIVE_COMPLETE_CALLBACK)
 /**
  * Sets the function to call if a protocol message has arrived
  */
 void IRrecv::registerReceiveCompleteCallback(void (*aReceiveCompleteCallbackFunction)(void)) {
     irparams.ReceiveCompleteCallbackFunction = aReceiveCompleteCallbackFunction;
 }
+#endif
 
 /**
  * Start the receiving process.
@@ -772,7 +774,7 @@ bool IRrecv::decodePulseDistanceWidthData(uint_fast8_t aNumberOfBits, IRRawlenTy
             } else {
                 tDecodedData |= tMask;
             }
-            IR_TRACE_PRINTLN('1');
+            IR_TRACE_PRINTLN(F("=> 1"));
         } else {
 #if defined DECODE_STRICT_CHECKS
             /*
@@ -811,7 +813,7 @@ bool IRrecv::decodePulseDistanceWidthData(uint_fast8_t aNumberOfBits, IRRawlenTy
             }
 #endif
             // do not set the bit
-            IR_TRACE_PRINTLN('0');
+            IR_TRACE_PRINTLN(F("=> 0"));
         }
 #if defined DECODE_STRICT_CHECKS
         // If we have no stop bit, assume that last space, which is not recorded, is correct, since we can not check it
@@ -1225,7 +1227,7 @@ void printActiveIRProtocols(Print *aSerial) {
     aSerial->print(F("Lego Power Functions, "));
 #endif
 #if defined(DECODE_BOSEWAVE)
-    aSerial->print(F("Bosewave , "));
+    aSerial->print(F("Bosewave, "));
 #endif
 #if defined(DECODE_MAGIQUEST)
     aSerial->print(F("MagiQuest, "));

@@ -100,6 +100,10 @@ int WiFiClass::disconnect(bool persistent) {
 }
 
 bool WiFiClass::config(IPAddress local_ip, IPAddress dns_server, IPAddress gateway, IPAddress subnet) {
+	if (dns_server == INADDR_NONE) {
+		dns_server = local_ip;
+		dns_server[3] = 1;
+	}
   return EspAtDrv.staStaticIp(local_ip, gateway, subnet) && setDNS(dns_server);
 }
 
@@ -182,6 +186,14 @@ uint8_t* WiFiClass::BSSID(uint8_t* bssid) {
   int32_t rssi = 0;
   EspAtDrv.apQuery(nullptr, bssid, ch, rssi);
   return bssid;
+}
+
+uint8_t WiFiClass::channel() {
+  uint8_t bssid[6] = {0};
+  uint8_t ch = 0;
+  int32_t rssi = 0;
+  EspAtDrv.apQuery(nullptr, bssid, ch, rssi);
+  return ch;
 }
 
 int32_t WiFiClass::RSSI() {
@@ -360,6 +372,36 @@ IPAddress WiFiClass::apSubnetMask() {
   IPAddress mask;
   EspAtDrv.softApIpQuery(ip, gw, mask);
   return mask;
+}
+
+bool WiFiClass::softAP(const char* ssid, const char* psk, int channel, int ssid_hidden, int max_connection) {
+  return beginAP(ssid, psk, channel, 0, max_connection, ssid_hidden);
+}
+
+bool WiFiClass::softAPConfig(IPAddress local_ip, IPAddress gateway, IPAddress subnet) {
+  return configureAP(local_ip, gateway, subnet);
+}
+
+bool WiFiClass::softAPdisconnect() {
+  return endAP(false);
+}
+
+IPAddress WiFiClass::softAPIP() {
+  return apIP();
+}
+
+uint8_t* WiFiClass::softAPmacAddress(uint8_t* mac) {
+  return apMacAddress(mac);
+}
+
+String WiFiClass::softAPSSID() {
+  char ssid[33];
+  return apSSID(ssid);
+}
+
+String WiFiClass::softAPPSK() {
+  char pass[64];
+  return apPassphrase(pass);
 }
 
 const char* WiFiClass::firmwareVersion(char* buffer) {
