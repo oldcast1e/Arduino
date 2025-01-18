@@ -3,7 +3,7 @@ Servo ms;
 void setup(){
     Serial.begin(9600);
     ms.attach(9);
-    ms.write(0);
+    ms.write(90);
 }
 void loop(){
     if(Serial.available()>0){

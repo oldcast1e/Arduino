@@ -132,7 +132,7 @@ bool IRrecv::decodeLegoPowerFunctions() {
     }
 
     // Check we have enough data - +4 for initial gap, start bit mark and space + stop bit mark
-    if (decodedIRData.rawDataPtr->rawlen != (2 * LEGO_BITS) + 4) {
+    if (decodedIRData.rawlen != (2 * LEGO_BITS) + 4) {
         IR_DEBUG_PRINT(F("LEGO: "));
         IR_DEBUG_PRINT(F("Data length="));
         IR_DEBUG_PRINT(decodedIRData.rawDataPtr->rawlen);
@@ -187,7 +187,7 @@ bool IRrecv::decodeLegoPowerFunctions() {
     /*
      * Check for autorepeat (should happen 4 times for one press)
      */
-    if (decodedIRData.initialGap < (LEGO_AUTO_REPEAT_PERIOD_MAX / MICROS_PER_TICK)) {
+    if (decodedIRData.initialGapTicks < (LEGO_AUTO_REPEAT_PERIOD_MAX / MICROS_PER_TICK)) {
         decodedIRData.flags |= IRDATA_FLAGS_IS_AUTO_REPEAT;
     }
     decodedIRData.address = tToggleEscapeChannel;

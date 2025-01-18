@@ -1,104 +1,139 @@
-#include <ESP8266WiFi.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
-// 네트워크 SSID (이름)
-const char* ssid = "oldcast1e";
-// 네트워크 비밀번호
-const char* password = "dlgjstjd";
+// I2C LCD 초기화 (주소: 0x27, 16×2 디스플레이)
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// const char* str = "oldcast1e!";
-// Wi-Fi 서버 객체 생성
-WiFiServer server(80);
-
-// Wi-Fi 연결 함수
-void connectToWiFi() {
-  Serial.println();
-  Serial.println();
-  Serial.print("Wi-Fi 연결 시도: ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  // Wi-Fi 연결 대기
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("Wi-Fi 연결 성공!");
-}
-
-// 서버 시작 함수
-void startServer() {
-  // 서버 시작
-  server.begin();
-  Serial.println("서버 시작");
-
-  // 서버의 IP 주소 출력
-  Serial.print("서버 주소: ");
-  Serial.println(WiFi.localIP());
-}
-
-// 클라이언트 요청 처리 함수
-void handleClientRequest(char *str) {
-  // 클라이언트 대기
-  WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
-
-  // 클라이언트가 연결되면 출력
-  Serial.println("새로운 클라이언트 연결");
-  
-  // 클라이언트 요청 읽기
-  while(!client.available()){
-    delay(1);
-  }
-  String request = client.readStringUntil('\r');
-  Serial.println(request);
-  client.flush();
-
-  // 응답 전송 함수 호출
-  sendResponse(client,str);
-
-  Serial.println("클라이언트 연결 해제");
-  Serial.println("");
-}
-
-// 응답 전송 함수
-void sendResponse(WiFiClient client, char *str) {
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/html; charset=utf-8"); // UTF-8 문자 인코딩 설정
-  client.println(""); // 중요: 응답의 빈 줄
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html>");
-  client.println("<meta charset=\"UTF-8\">"); // HTML에서도 UTF-8 설정
-  client.println("<h1>Hello World!</h1>");
-  client.println("<p>ESP8266을 사용하여 만든 웹 서버입니다.</p>");
-  // client.print("<p>");  client.print(str);  client.print("</p>");
-  client.println("</html>");
-}
+// 사용자 환경에 맞게 수정
+const char* WIFI_SSID = "oldcast1e";  // 핫스팟 SSID
+const char* WIFI_PASS = "popopopo";      // 핫스팟 비밀번호
+const char* SERVER_IP = "118.235.92.209";  // 서버 IP
+int SERVER_PORT = 12345;                   // 서버 포트
 
 void setup() {
+  // 하드웨어 시리얼 초기화
   Serial.begin(115200);
-  delay(10);
+  
+  // LCD 초기화
+  Wire.begin();
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("ESP-01 INIT...");
+  delay(1500);
 
-  // Wi-Fi 연결 함수 호출
-  connectToWiFi();
+  // AT 명령어 테스트
+  sendAT("AT", 2000, "AT Test");
 
-  // 서버 시작 함수 호출
-  startServer();
+  // Wi-Fi 연결
+  String cmd = "AT+CWJAP=\"";
+  cmd += WIFI_SSID;
+  cmd += "\",\"";
+  cmd += WIFI_PASS;
+  cmd += "\"";
+  sendAT(cmd, 8000, "WiFi Connect");
+
+  // 단일 연결 모드 설정
+  sendAT("AT+CIPMUX=0", 2000, "CIPMUX=0");
+
+  // TCP 서버 연결
+  cmd = "AT+CIPSTART=\"TCP\",\"";
+  cmd += SERVER_IP;
+  cmd += "\",";
+  cmd += SERVER_PORT;
+  sendAT(cmd, 5000, "CIPSTART");
+
+  // "hello" 데이터 전송
+  String data = "hello";
+  cmd = "AT+CIPSEND=";
+  cmd += data.length();
+  sendAT(cmd, 2000, "CIPSEND");
+  
+  // 실제 데이터 전송
+  lcd.clear();
+  lcd.print("Sending data...");
+  Serial.print(data);  // ESP-01로 데이터 전송
+  delay(2000);
+
+  // 서버 응답 확인
+  readPartialResponse(2000, "Got Resp?");
+  
+  // 소켓 종료
+  sendAT("AT+CIPCLOSE", 2000, "Close Sock");
+  
+  // 완료 메시지
+  lcd.clear();
+  lcd.print("Done! Check");
+  lcd.setCursor(0, 1);
+  lcd.print("Server side");
 }
 
 void loop() {
-  // 클라이언트 요청 처리 함수 호출
-  if(Serial.available()){
-    	//실행하고 싶은 코드
-        String str = Serial.readString(); 
-        //이때 저장한 값은 1바이트 (문자)임에 주의한다.
-        Serial.println(input);//문자를 출력한다.
+  // 반복 작업 없음
+}
 
+/***********************************************************
+ * 함수: sendAT
+ * - AT 명령을 ESP-01에 전송
+ * - 응답을 대기하며 LCD에 진행 상태 표시
+ ***********************************************************/
+void sendAT(String cmd, unsigned long waitTime, const char* info) {
+  lcd.clear();
+  lcd.print(info);
+  lcd.setCursor(0, 1);
+  lcd.print("Sending..");
+  
+  while (Serial.available()) {
+    Serial.read();  // 잔여 버퍼 비우기
   }
-  handleClientRequest();
+  Serial.println(cmd);
 
+  unsigned long start = millis();
+  while (millis() - start < waitTime) {
+    if (Serial.available()) {
+      char c = Serial.read();  // 데이터 읽기
+      // String receivedData = Serial.readString();
+
+      // // LCD에 표시 (최대 16자)
+      // lcd.clear();
+      // lcd.setCursor(0, 0);
+      // lcd.print("Received:");
+      // lcd.setCursor(0, 1);
+      // lcd.print(receivedData.substring(0, 16));  // 최대 16자 표시
+    }
+  }
+
+  lcd.clear();
+  lcd.print(info);
+  lcd.setCursor(0, 1);
+  lcd.print("OK or Timeout");
+  delay(1000);
+}
+
+/***********************************************************
+ * 함수: readPartialResponse
+ * - 서버 응답 일부를 LCD에 표시
+ ***********************************************************/
+void readPartialResponse(unsigned long waitTime, const char* title) {
+  lcd.clear();
+  lcd.print(title);
+  lcd.setCursor(0, 1);
+
+  unsigned long start = millis();
+  char buffer[17];  // 최대 16자 + null
+  byte idx = 0;
+
+  while (millis() - start < waitTime) {
+    if (Serial.available()) {
+      char c = Serial.read();
+      if (idx < 16) {
+        buffer[idx++] = c;
+      }
+    }
+  }
+  buffer[idx] = '\0';  // 문자열 종료
+
+  lcd.print(buffer);  // LCD에 표시
+  delay(1500);
 }

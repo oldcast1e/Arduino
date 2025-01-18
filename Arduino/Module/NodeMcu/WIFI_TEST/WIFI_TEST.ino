@@ -1,7 +1,10 @@
 #include <ESP8266WiFi.h>
 
-const char* ssid = "heonseong";     // 네트워크 SSID (이름)
-const char* password = "popopopo"; // 네트워크 비밀번호
+// const char* ssid = "heonseong";     // 네트워크 SSID (이름)
+// const char* password = "popopopo"; // 네트워크 비밀번호
+
+const char* ssid = "oldcast1e";
+const char* password = "dlgjstjd";
 
 WiFiServer server(80);
 

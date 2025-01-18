@@ -9,10 +9,18 @@
 #include <Wire.h>
 #include <I2C_RTC.h>
 
-bool DS3231::begin()
+uint8_t DS3231::begin()
+{
+	Wire.begin();
+    return(DS3231_ADDR);
+	//Wire.endTransmission();
+}
+
+
+bool DS3231::isConnected()
 {
 	Wire.begin(); // join i2c bus
-	Wire.beginTransmission(0x68);
+	Wire.beginTransmission(DS3231_ADDR);
 	return (Wire.endTransmission() == 0 ? true : false);
 }
 
@@ -37,7 +45,7 @@ bool DS3231::isRunning(void)
 	// if(data_e == 0 && data_f == 0)
 	// 	return true;
 	// else
-	// 	return false;
+	//return false;
 }
 
 /*
@@ -117,8 +125,9 @@ void DS3231::setHourMode(uint8_t h_mode)
 
 	if(h_mode == CLOCK_H12 || h_mode == CLOCK_H24)
 	{
+		//Clock Hour Register
 		Wire.beginTransmission(DS3231_ADDR);
-		Wire.write(0x02);  // Hour Register
+		Wire.write(0x02);
 		Wire.endTransmission();
 
 		Wire.requestFrom(DS3231_ADDR, 1);
@@ -127,7 +136,37 @@ void DS3231::setHourMode(uint8_t h_mode)
 		bitWrite(data, 6, h_mode);
 
 		Wire.beginTransmission(DS3231_ADDR);
-		Wire.write(0x02);  // Hour Register
+		Wire.write(0x02);
+		Wire.write(data);
+		Wire.endTransmission();
+
+		//Alarm1 Hour Register
+		Wire.beginTransmission(DS3231_ADDR);
+		Wire.write(0x09);
+		Wire.endTransmission();
+
+		Wire.requestFrom(DS3231_ADDR, 1);
+		data = Wire.read();
+
+		bitWrite(data, 6, h_mode);
+
+		Wire.beginTransmission(DS3231_ADDR);
+		Wire.write(0x09);
+		Wire.write(data);
+		Wire.endTransmission();
+
+		//Alarm2 Hour Register
+		Wire.beginTransmission(DS3231_ADDR);
+		Wire.write(0x0C);
+		Wire.endTransmission();
+
+		Wire.requestFrom(DS3231_ADDR, 1);
+		data = Wire.read();
+
+		bitWrite(data, 6, h_mode);
+
+		Wire.beginTransmission(DS3231_ADDR);
+		Wire.write(0x0C);
 		Wire.write(data);
 		Wire.endTransmission();
 	}
@@ -135,9 +174,10 @@ void DS3231::setHourMode(uint8_t h_mode)
 
 uint8_t DS3231::getHourMode()
 {
-	bool h_mode;
+	bool clock_h_mode, alarm1_h_mode,alarm2_h_mode;
 	uint8_t data;
 
+	//Clock Hour Register
 	Wire.beginTransmission(DS3231_ADDR);
 	Wire.write(0x02);
 	Wire.endTransmission();
@@ -145,9 +185,29 @@ uint8_t DS3231::getHourMode()
 	Wire.requestFrom(DS3231_ADDR, 1);
 	data = Wire.read();
 
-	h_mode = bitRead(data, 6);
+	clock_h_mode = bitRead(data, 6);
 
-	return (h_mode);
+	//Clock Alarm1 Register
+	Wire.beginTransmission(DS3231_ADDR);
+	Wire.write(0x09);
+	Wire.endTransmission();
+
+	Wire.requestFrom(DS3231_ADDR, 1);
+	data = Wire.read();
+
+	alarm1_h_mode = bitRead(data, 6);
+
+	//Clock Alarm2 Register
+	Wire.beginTransmission(DS3231_ADDR);
+	Wire.write(0x0C);
+	Wire.endTransmission();
+
+	Wire.requestFrom(DS3231_ADDR, 1);
+	data = Wire.read();
+
+	alarm2_h_mode = bitRead(data, 6);
+
+	return (clock_h_mode | alarm1_h_mode | alarm2_h_mode);
 
 }
 
@@ -222,16 +282,6 @@ void DS3231::setSeconds(uint8_t seconds)
 /*-----------------------------------------------------------
 getMinutes
 -----------------------------------------------------------*/
-uint8_t DS3231::getMinutes()
-{
-	uint8_t minutes;
-	Wire.beginTransmission(DS3231_ADDR);
-	Wire.write(0x01);  // Minute Register
-	Wire.endTransmission();
-	Wire.requestFrom(DS3231_ADDR, 1);
-	minutes = Wire.read();
-	return (bcd2bin(minutes));
-}
 
 void DS3231::setMinutes(uint8_t minutes)
 {
@@ -242,6 +292,17 @@ void DS3231::setMinutes(uint8_t minutes)
 		Wire.write(bin2bcd(minutes));
 		Wire.endTransmission();
 	}
+}
+
+uint8_t DS3231::getMinutes()
+{
+	uint8_t minutes;
+	Wire.beginTransmission(DS3231_ADDR);
+	Wire.write(0x01);  // Minute Register
+	Wire.endTransmission();
+	Wire.requestFrom(DS3231_ADDR, 1);
+	minutes = Wire.read();
+	return (bcd2bin(minutes));
 }
 
 /*-----------------------------------------------------------
@@ -276,12 +337,10 @@ uint8_t DS3231::getHours()
 
 void  DS3231::setHours(uint8_t hours)
 {
-	bool h_mode;
+	bool h_mode = getHourMode();
 	bool pm_flag;
 	if (hours >= 00 && hours <= 23)
 	{
-		h_mode = getHourMode();
-
 		Wire.beginTransmission(DS3231_ADDR);
 		Wire.write(0x02);  // Hour Register
 		if (h_mode == CLOCK_H24)
@@ -328,6 +387,12 @@ void DS3231::setWeek(uint8_t week)
 		Wire.endTransmission();
 	}
 }
+/*-----------------------------------------------------------
+Update Week based on date
+
+TODO : Use all the data validation
+-----------------------------------------------------------*/
+
 
 void DS3231::updateWeek()
 {
@@ -586,6 +651,56 @@ void DS3231::setDateTime(char* date, char* time)
 	second = atoi(time + 6);
 	setSeconds(second);
 }
+/*-----------------------------------------------------------
+setDateTime(__TIMESTAMP__)
+Uses Built in variable to set time 
+
+//Timestamp format Fri Mar 08 13:01:53 2024
+-----------------------------------------------------------*/
+
+void DS3231::setDateTime(String timestamp)
+{
+	uint8_t day, month, hour, minute, second, week;
+	uint16_t year;
+	String month_str, week_str;
+	
+	week_str = timestamp.substring(0,3);
+	month_str = timestamp.substring(4,7);
+	day = timestamp.substring(8,11).toInt();
+	hour = timestamp.substring(11,13).toInt();
+	minute = timestamp.substring(14,16).toInt();
+	second = timestamp.substring(17,19).toInt();
+	year = timestamp.substring(20,24).toInt();
+
+	switch (week_str[0]) {
+	case 'S': week = week_str[1] == 'u' ? 1 : 7; break;
+	case 'M': week = 2; break;
+	case 'T': week = week_str[1] == 'u' ? 3 : 5; break;
+	case 'W': week = 4; break;
+	case 'F': week = 6; break;
+	}
+
+	switch (month_str[0]) {
+	case 'J': month = (month_str[1] == 'a') ? 1 : ((month_str[2] == 'n') ? 6 : 7); break;
+	case 'F': month = 2; break;
+	case 'A': month = month_str[2] == 'r' ? 4 : 8; break;
+	case 'M': month = month_str[2] == 'r' ? 3 : 5; break;
+	case 'S': month = 9; break;
+	case 'O': month = 10; break;
+	case 'N': month = 11; break;
+	case 'D': month = 12; break;
+	}
+
+	setWeek(week);
+	
+	setDay(day);
+	setMonth(month);
+	setYear(year);
+
+	setHours(hour);
+	setMinutes(minute);
+	setSeconds(second);
+}
 
 /*-----------------------------------------------------------
 setEpoch()
@@ -638,9 +753,6 @@ void DS3231::setEpoch(time_t epoch, bool is_unix_epoch)
 	Wire.endTransmission();
 
 	/* Convert time to 24Hour if it is in 12 Hour */
-	
-	
-
 	
 	if (h_mode == CLOCK_H12)
 	{
@@ -934,11 +1046,10 @@ void DS3231::setAlarm1(uint8_t minute, uint8_t second)
 
 void DS3231::setAlarm1(uint8_t hours, uint8_t minutes, uint8_t seconds)
 {
+	bool h_mode = getHourMode();
+
 	if (hours <= 23 && minutes <= 59 && seconds <= 59)
 	{
-		bool h_mode;
-		h_mode = getHourMode();
-
 		Wire.beginTransmission(DS3231_ADDR);
 		Wire.write(0x07);
 		Wire.write(bin2bcd(seconds));    // 0x07 Alarm1 Second
@@ -1036,6 +1147,7 @@ void DS3231::setAlarm1(uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seco
 	}
 }
 
+/*
 DateTime DS3231::getAlarm1()
 {
 	DateTime Alarm1;
@@ -1064,7 +1176,39 @@ DateTime DS3231::getAlarm1()
 
 	return(Alarm1);
 }
+*/
 //Alarm2
+
+void DS3231::setAlarm2Minutes(uint8_t minutes)
+{
+	if (minutes >= 00 && minutes <= 59)
+	{
+		Wire.beginTransmission(DS3231_ADDR);
+		Wire.write(0x0B);
+		Wire.write(bin2bcd(minutes));
+
+		//Serial.println(bin2bcd(minutes),BIN);
+		Wire.endTransmission();
+	}
+}
+
+uint8_t DS3231::getAlarm2Minutes()
+{
+	uint8_t minutes;
+	Wire.beginTransmission(DS3231_ADDR);
+	Wire.write(0x0B);  // Minute Register
+	Wire.endTransmission();
+	Wire.requestFrom(DS3231_ADDR, 1);
+	minutes = Wire.read();
+
+	//Serial.println(minutes);
+
+	bitClear(minutes,7);
+	return (bcd2bin(minutes));
+}
+
+
+
 
 void DS3231::setAlarm2()
 {
@@ -1096,14 +1240,35 @@ void DS3231::setAlarm2(uint8_t hour, uint8_t minute)
 	Wire.endTransmission();
 }
 
-void DS3231::setAlarm2(uint8_t day, uint8_t hour, uint8_t minute)
+void DS3231::setAlarm2(uint8_t week, uint8_t hours, uint8_t minute)
 {
-	Wire.beginTransmission(DS3231_ADDR);
-	Wire.write(0x0B);
-	Wire.write(bin2bcd(minute));    // 0x0B Alarm2 Minute
-	Wire.write(bin2bcd(hour));      // 0x0C Alarm2 Hour
-	Wire.write(bin2bcd(day));       // 0x0D Alarm2 Day
-	Wire.endTransmission();
+	bool h_mode = getHourMode();
+	bool pm_flag;
+
+	if (hours >= 00 && hours <= 23)
+	{
+		Wire.beginTransmission(DS3231_ADDR);
+		Wire.write(0x0B);
+		Wire.write(bin2bcd(minute));    // 0x0B Alarm2 Minute
+		if (h_mode == CLOCK_H24)
+		{
+			Wire.write(bin2bcd(hours));
+		}
+		else if (h_mode == CLOCK_H12)
+		{
+			pm_flag = (hours >= 12);
+			if (hours == 0)
+				hours = 12;
+			if (hours > 12)
+				hours -= 12;
+			hours = bin2bcd(hours);
+			bitWrite(hours, 5, pm_flag);
+			bitSet(hours, 6);			// Week mode
+			Wire.write(hours);
+		}
+		Wire.write(bin2bcd(week));       // 0x0D Alarm2 Day
+		Wire.endTransmission();
+	}
 }
 
 bool DS3231::isAlarm1Tiggered()
@@ -1269,6 +1434,28 @@ float DS3231::getTemp()
 }
 
 /* Helpers */
+
+
+uint8_t DS3231::_read_one_register(uint8_t reg_address)
+{
+    uint8_t reg_data;
+    
+    Wire.beginTransmission(_i2c_address);
+    Wire.write(reg_address);
+    Wire.endTransmission();
+
+    Wire.requestFrom((int)_i2c_address,(int) 1);
+    reg_data = Wire.read();
+    return(reg_data);
+}
+
+void DS3231::_write_one_register(uint8_t reg_address, uint8_t reg_data)
+{
+    Wire.beginTransmission(_i2c_address);
+    Wire.write(reg_address);
+    Wire.write(reg_data);
+    Wire.endTransmission();
+}
 
 uint8_t DS3231::bcd2bin(uint8_t val)
 {
